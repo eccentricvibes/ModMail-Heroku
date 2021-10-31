@@ -120,7 +120,7 @@ async def on_ready():
 
 @commands.Cog.listener()
 async def on_message(self, ctx, message, bad_words):
-    # counter = 0
+    counter = 0
     # guild = ctx.guild
     # for i in bad_words:
     #     if message in bad_words:
