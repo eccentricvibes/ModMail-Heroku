@@ -7,6 +7,7 @@ import logging
 from discord.ext.commands import has_permissions
 import textwrap
 
+
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -18,7 +19,7 @@ class Moderation(commands.Cog):
         }
 
     @commands.command()
-    async def report(self, ctx, staff:discord.Member, *, message:str):
+    async def report(self, ctx, staff: discord.Member, *, message: str):
         if staff.guild_permissions.administrator:
             try:
                 await staff.send(message)
@@ -27,12 +28,14 @@ class Moderation(commands.Cog):
                 await ctx.send(embed=embed)
             except Forbidden:
                 embed = discord.Embed()
-                embed.add_field(name="Oops!", value=f"{staff.name} has their dms currently turned off, so the report could not be sent.")
+                embed.add_field(name="Oops!",
+                                value=f"{staff.name} has their dms currently turned off, so the report could not be sent.")
                 await ctx.send("If you need help finding")
                 await ctx.send(embed=embed)
         else:
             embed = discord.Embed()
-            embed.add_field(name="Oops!", value="Message could not be sent, as the specified member is not a staff member, or they do not have administrator permissions.")
+            embed.add_field(name="Oops!",
+                            value="Message could not be sent, as the specified member is not a staff member, or they do not have administrator permissions.")
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -95,7 +98,8 @@ class Moderation(commands.Cog):
     async def rename(self, ctx, member: discord.Member, new_name, *, reason: str):
         embed = discord.Embed()
         await member.edit(nick=new_name)
-        embed.add_field(name="Renaming user...", value=f"{member.name}'s nickname was successfully changed! Sending reason to user...")
+        embed.add_field(name="Renaming user...",
+                        value=f"{member.name}'s nickname was successfully changed! Sending reason to user...")
         await member.send(reason)
         await ctx.send(embed=embed)
 
@@ -106,9 +110,6 @@ class Moderation(commands.Cog):
         user_pfp = member.avatar_url()
 
 
-
-
-
 @commands.Cog.listener()
 async def on_ready():
     print("ready")
@@ -117,6 +118,7 @@ async def on_ready():
         await asyncio.sleep(10)
         with open("user_messages.txt", "r+") as file:
             file.truncate(0)
+
 
 @commands.Cog.listener()
 async def on_message(self, ctx, message, bad_words):
@@ -137,13 +139,11 @@ async def on_message(self, ctx, message, bad_words):
                 file.writelines(f"{message.auth.id}, {message.author.name}: {message.content}")
                 if counter > 5:
                     embed = discord.Embed()
-                    embed.add_field(name="Uh oh!", value=f"{message.author.name, message.author.id} was muted for sending messages too quickly.")
-                    spamming_user = message.author.name  
+                    embed.add_field(name="Uh oh!",
+                                    value=f"{message.author.name, message.author.id} was muted for sending messages too quickly.")
+                    spamming_user = message.author.name
 
-
-
-
-    # @commands.command()
+                    # @commands.command()
     # async def help(self, ctx, called_command, command_descriptions):
     #     embed = discord.Embed()
     #     embed2 = discord.Embed()
