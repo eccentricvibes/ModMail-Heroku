@@ -10,7 +10,6 @@ import textwrap
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.bad_words = ["faggot", "nigga", "nigger", "retard", "chink", "ching chong"]
         self.command_descriptions = {
             "kick": "This is a basic command that can kick somebody from the server they are sharing with the command user. You need moderator/administrator permissions to run this command.",
             "ban": "This is a basic command that can ban somebody from the server they are sharing with the command user. You need administrator permissions to run this command.",
@@ -29,7 +28,7 @@ class Moderation(commands.Cog):
             except Forbidden:
                 embed = discord.Embed()
                 embed.add_field(name="Oops!", value=f"{staff.name} has their dms currently turned off, so the report could not be sent.")
-                await ctx.send("If you need help finding ")
+                await ctx.send("If you need help finding")
                 await ctx.send(embed=embed)
         else:
             embed = discord.Embed()
@@ -121,15 +120,15 @@ async def on_ready():
 
 @commands.Cog.listener()
 async def on_message(self, ctx, message, bad_words):
-    counter = 0
-    guild = ctx.guild
-    for i in bad_words:
-        if message in bad_words:
-            await message.delete()
-            await ctx.send(f"{message.author.mention}, that language isn't allowed here!")
-            logging.basicConfig(filename="bot_logs.txt", filemode="r+", level="WARNING")
-            logging.warning(message)
-            logging.info(f"{message.author} used a bad word! Word censored was: {message.search(i)}")
+    # counter = 0
+    # guild = ctx.guild
+    # for i in bad_words:
+    #     if message in bad_words:
+    #         await message.delete()
+    #         await ctx.send(f"{message.author.mention}, that language isn't allowed here!")
+    #         logging.basicConfig(filename="bot_logs.txt", filemode="r+", level="WARNING")
+    #         logging.warning(message)
+    #         logging.info(f"{message.author} used a bad word! Word censored was: {message.search(i)}")
 
     with open("spam_detection.txt", "r+") as file:
         for lines in file:
