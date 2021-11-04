@@ -7,9 +7,12 @@ import logging
 from discord.ext.commands import has_permissions
 import textwrap
 
+class HelpCommand(commands.MinimalHelpCommand):
+    def
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
+        super().__init__()
         self.bot = bot
         self.command_descriptions = {
             "kick": "This is a basic command that can kick somebody from the server they are sharing with the command user. You need moderator/administrator permissions to run this command.",
@@ -86,6 +89,29 @@ class Moderation(commands.Cog):
             embed.add_field(name="Oops!", value="You don't have the permission to ban users!")
             await ctx.send(embed="")
 
+    @has_permissions(administrator=True)
+    @commands.command()
+    async def clear(self, ctx, amount: int):
+        embed = discord.Embed(description=f"Successfully cleared {amount} messages!")
+        await ctx.channel.purge(1)
+        await ctx.channel.purge(amount)
+        await ctx.send(embed=embed)
+
+
+    @commands.command()
+    async def commands_help(self, ctx):
+        for page in self.paginator.pages:
+            embed = discord.Embed(description=page)
+            await ctx.send(embed=embed)
+
+
+
+
+
+    @commands.command()
+    async def mute(self, user: discord.Member, *, reason: str):
+        embed = discord.Embed()
+
     # @commands.command(aliases=["c_h"])
     # async def commands_help(self, ctx, bot):
     #     embed = discord.Embed()
@@ -143,7 +169,10 @@ async def on_message(self, ctx, message, bad_words):
                                     value=f"{message.author.name, message.author.id} was muted for sending messages too quickly.")
                     spamming_user = message.author.name
 
-                    # @commands.command()
+
+
+
+    # @commands.command()
     # async def help(self, ctx, called_command, command_descriptions):
     #     embed = discord.Embed()
     #     embed2 = discord.Embed()
