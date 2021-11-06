@@ -6,9 +6,7 @@ from discord import Forbidden
 import logging
 from discord.ext.commands import has_permissions
 import textwrap
-
-class HelpCommand(commands.MinimalHelpCommand):
-    def
+from bs4 import BeautifulSoup
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -21,13 +19,15 @@ class Moderation(commands.Cog):
             "help": "This command is the reason how you can see the descriptions of these commands right now!"
         }
 
-    @commands.command()
+    @commands.group()
     async def report(self, ctx, staff: discord.Member, *, message: str):
         if staff.guild_permissions.administrator:
             try:
-                await staff.send(message)
+                report_embed = discord.Embed()
+                report_embed.add_field(name=f"Report sent from {str(ctx.author)}!", value=f"{message}")
+                await staff.send(embed=report_embed)
                 embed = discord.Embed()
-                embed.add_field(name="⠀", value="Report successfully sent to the specified staff member!")
+                embed.add_field(name="⠀", value="Report successfully sent to the specified staff member, they will respond whenever they have the time to.")
                 await ctx.send(embed=embed)
             except Forbidden:
                 embed = discord.Embed()
@@ -40,6 +40,12 @@ class Moderation(commands.Cog):
             embed.add_field(name="Oops!",
                             value="Message could not be sent, as the specified member is not a staff member, or they do not have administrator permissions.")
             await ctx.send(embed=embed)
+
+    @report.command(invoke_without_command=True)
+    async def reply(self, ctx, user: discord.Member, *, response: str):
+        embed = discord.Embed()
+        embed.add_field(name=f"Staff responded to report!", value=f"Message: {response}")
+        await user.send(embed=embed)
 
     @commands.command()
     async def evaluate(self, ctx, *, code):
