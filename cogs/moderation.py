@@ -7,6 +7,7 @@ import logging
 from discord.ext.commands import has_permissions
 import textwrap
 from bs4 import BeautifulSoup
+import requests
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -19,12 +20,12 @@ class Moderation(commands.Cog):
             "help": "This command is the reason how you can see the descriptions of these commands right now!"
         }
 
-    @commands.group()
-    async def report(self, ctx, staff: discord.Member, *, message: str):
+    @commands.command()
+    async def report(self, ctx, user: discord.Member, staff: discord.Member, *, message: str):
         if staff.guild_permissions.administrator:
             try:
                 report_embed = discord.Embed()
-                report_embed.add_field(name=f"Report sent from {str(ctx.author)}!", value=f"{message}")
+                report_embed.add_field(name=f"Report sent from {str(ctx.author)}!", value=f"Report sent regarding {user}, reason: {message}")
                 await staff.send(embed=report_embed)
                 embed = discord.Embed()
                 embed.add_field(name="⠀", value="Report successfully sent to the specified staff member, they will respond whenever they have the time to.")
@@ -41,11 +42,11 @@ class Moderation(commands.Cog):
                             value="Message could not be sent, as the specified member is not a staff member, or they do not have administrator permissions.")
             await ctx.send(embed=embed)
 
-    @report.command(invoke_without_command=True)
-    async def reply(self, ctx, user: discord.Member, *, response: str):
+    @commands.command()
+    async def reply(self, ctx, member: discord.Member, *, response: str):
         embed = discord.Embed()
-        embed.add_field(name=f"Staff responded to report!", value=f"Message: {response}")
-        await user.send(embed=embed)
+        embed.add_field(name=f"Reply to {member.name, member.id}'s report", value=f"{ctx.author.name}: {response}")
+        await member.send(embed=embed)
 
     @commands.command()
     async def evaluate(self, ctx, *, code):
@@ -104,11 +105,11 @@ class Moderation(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    @commands.command()
-    async def commands_help(self, ctx):
-        for page in self.paginator.pages:
-            embed = discord.Embed(description=page)
-            await ctx.send(embed=embed)
+    # @commands.command()
+    # async def commands_help(self, ctx):
+    #     for page in self.paginator.pages:
+    #         embed = discord.Embed(description=page)
+    #         await ctx.send(embed=embed)
 
 
 
@@ -137,9 +138,23 @@ class Moderation(commands.Cog):
 
     @commands.command()
     async def user(self, ctx, member: discord.Member):
-        created_on = member.created_at.strftime("%b", "%d", "%y")
-        joined_on = member.joined_on.strftime("%b", "%d", "%y")
-        user_pfp = member.avatar_url()
+        created_on = member.created_at.strftime("%A, %B %d %Y: %H:%M:%S %p")
+        joined_on = member.joined_at.strftime("%A, %B %d %Y: %H:%M:%S %p")
+        user_pfp = member.avatar_url
+        embed = discord.Embed()
+        embed.add_field(name=f"User information", value=f"User created on {created_on}\nUser joined on {joined_on}\nLink to user's profile picture {user_pfp}")
+        await ctx.send(embed=embed)
+
+    # @commands.command()
+    # async def rtfm(self, ctx, *, keywords: str):
+    #     response = requests.get(f"https://www.google.com/search?q={keywords}")
+    #     html = response.text
+    #     soup = BeautifulSoup(html, "lxml")
+    #     page_list = soup.select("")
+    #
+    # @command.command()
+    # async def warn(self, cftx: Context, ):
+
 
 
 @commands.Cog.listener()
