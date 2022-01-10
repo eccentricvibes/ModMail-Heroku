@@ -1,16 +1,10 @@
 import discord
 from discord.ext import commands
-import aiohttp
 import asyncio
 from discord import Forbidden
-import logging
 from discord.ext.commands import has_permissions
 import textwrap
-from bs4 import BeautifulSoup
-import requests
-import mysql.connector
 from googlesearch import search
-import os
 import datetime
 
 class Moderation(commands.Cog):
@@ -191,20 +185,20 @@ class Moderation(commands.Cog):
             reaction_x = await var.add_reaction("❌")
 
             
-    commands.has_permissions(administrator=True)
-    @commands.command()
-    async def serverinfo(self, ctx):
-        request_time = datetime.datetime.now()
-        embed = discord.Embed(title="Info for {}".format(ctx.message.server.name), description="Information about the server")
-        await embed.add_field(name="Server name: ", value=ctx.message.server.name, inline=True)
-        await embed.add_field(name="Server id: ", value=ctx.message.server.id, inline=True)
-        await embed.add_field(name="Server members: ", value=f"{len(ctx.message.server.members)}", inline=True)
-        await embed.add_field(name="Server owner: ", value=ctx.message.server.owner, inline=True)
-        await embed.add_field(name="Server roles: ", value=f"{len(ctx.message.server.roles)}", inline=True)
-
-        servermade = ctx.message.server.
-
-        await embed.set_footer(text=f"{ctx.message.author} requested server information at {request_time.strftime('%H:%M:%S')} on {request_time.strftime('%m/%d/%Y')}")
+    # commands.has_permissions(administrator=True)
+    # @commands.command()
+    # async def serverinfo(self, ctx):
+    #     request_time = datetime.datetime.now()
+    #     embed = discord.Embed(title="Info for {}".format(ctx.message.server.name), description="Information about the server")
+    #     await embed.add_field(name="Server name: ", value=ctx.message.server.name, inline=True)
+    #     await embed.add_field(name="Server id: ", value=ctx.message.server.id, inline=True)
+    #     await embed.add_field(name="Server members: ", value=f"{len(ctx.message.server.members)}", inline=True)
+    #     await embed.add_field(name="Server owner: ", value=ctx.message.server.owner, inline=True)
+    #     await embed.add_field(name="Server roles: ", value=f"{len(ctx.message.server.roles)}", inline=True)
+    #
+    #     servermade = ctx.message.server.
+    #
+    #     await embed.set_footer(text=f"{ctx.message.author} requested server information at {request_time.strftime('%H:%M:%S')} on {request_time.strftime('%m/%d/%Y')}")
 
 
     @commands.command()
