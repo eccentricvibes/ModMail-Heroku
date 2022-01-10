@@ -8,6 +8,10 @@ from discord.ext.commands import has_permissions
 import textwrap
 from bs4 import BeautifulSoup
 import requests
+import mysql.connector
+from googlesearch import search
+import os
+import datetime
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -19,7 +23,16 @@ class Moderation(commands.Cog):
             "get_bog_logs": "This is a command for staff members that can allow them to see the logs of what the bot has done, and what users of their server has done.",
             "help": "This command is the reason how you can see the descriptions of these commands right now!"
         }
+        self.user_events = {}
+        # mydb = mysql.connector.connect(
+        #     host="localhost",
+        #     user=os.environ["DB_USER"],
+        #     password=os.environ["DB_PASSWORD"],
+        # )
+        # mycursor = mydb.cursor()
 
+
+        # mycursor.execute()
     @commands.command()
     async def report(self, ctx, user: discord.Member, staff: discord.Member, *, message: str):
         if staff.guild_permissions.administrator:
@@ -39,13 +52,15 @@ class Moderation(commands.Cog):
         else:
             embed = discord.Embed()
             embed.add_field(name="Oops!",
-                            value="Message could not be sent, as the specified member is not a staff member, or they do not have administrator permissions.")
+                            value="Message could not be sent as the specified member is not a staff member, or they do not have administrator permissions.")
             await ctx.send(embed=embed)
 
     @commands.command()
     async def reply(self, ctx, member: discord.Member, *, response: str):
         embed = discord.Embed()
         embed.add_field(name=f"Reply to {member.name, member.id}'s report", value=f"{ctx.author.name}: {response}")
+        embed2 = discord.Embed()
+        embed.add_field(name="")
         await member.send(embed=embed)
 
     @commands.command()
@@ -145,6 +160,75 @@ class Moderation(commands.Cog):
         embed.add_field(name=f"User information", value=f"User created on {created_on}\nUser joined on {joined_on}\nLink to user's profile picture {user_pfp}")
         await ctx.send(embed=embed)
 
+    @commands.command()
+    async def rtfm(self, ctx, *, keywords: str):
+        embed = discord.Embed()
+        for query in search(keywords, tld="co.in", num=5, start=0, stop=5, pause=3):
+            embed.add_field(name="Result found!", value=f"{query}")
+        await ctx.send(embed=embed)
+        await asyncio.sleep(20)
+        await ctx.delete_message()
+
+    @commands.command()
+    async def create_event_reminder(self, ctx, time, *, event: str, members: discord.Member):
+        start_time = datetime.datetime.now()
+        end_time = start_time + time
+        end_time1 = end_time.strftime("%a, %b %d, %Y")
+        end_time2 = end_time.strftime("%I: %M:%S %p")
+        embed = discord.Embed()
+        await embed.add_field(name=f"Event set: {event}", value=f"Time set for reminder: {end_time1} at {end_time2}. No need to worry, ModMail will remind all the specified users, at the specified time for the event.")
+        members = list(members)
+        member_list = []
+        for member in members:
+            member_list.append(member)
+            self.user_events[member] = f"{event}, {end_time1} at {end_time2}"
+        if datetime.datetime.now() == end_time1 and end_time2:
+            for member in self.user_events.keys():
+                embed = discord.Embed()
+                await embed.add_field(name=f"There's an event coming up, {event}", value=f"{await ctx.mention(member)}, this event was scheduled for you!")
+            var = await ctx.send(embed=embed)
+            reaction_check = await var.add_reaction("✅")
+            reaction_x = await var.add_reaction("❌")
+
+            
+    commands.has_permissions(administrator=True)
+    @commands.command()
+    async def serverinfo(self, ctx):
+        request_time = datetime.datetime.now()
+        embed = discord.Embed(title="Info for {}".format(ctx.message.server.name), description="Information about the server")
+        await embed.add_field(name="Server name: ", value=ctx.message.server.name, inline=True)
+        await embed.add_field(name="Server id: ", value=ctx.message.server.id, inline=True)
+        await embed.add_field(name="Server members: ", value=f"{len(ctx.message.server.members)}", inline=True)
+        await embed.add_field(name="Server owner: ", value=ctx.message.server.owner, inline=True)
+        await embed.add_field(name="Server roles: ", value=f"{len(ctx.message.server.roles)}", inline=True)
+
+        servermade = ctx.message.server.
+
+        await embed.set_footer(text=f"{ctx.message.author} requested server information at {request_time.strftime('%H:%M:%S')} on {request_time.strftime('%m/%d/%Y')}")
+
+
+    @commands.command()
+    async def mute(self, ctx, member: discord.Member, *, reason: str):
+
+
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        embed = discord.Embed()
+
+    # @commands.command()
+    # async def store(self, ctx):
+
+
+        # search_message = soup.select(".search-summary")
+        # search_embed = soup.select("grid-item #search-results .search")
+        # query_li_tag = soup.select_all("li", class_="style")
+        # query_result_link = query_li_tag.get("href")
+        # result_description = soup.select(".grid-item #search-results .search .context").text
+        # embed = discord.Embed()
+        # embed.add_field(name="Querying on discord.py's documentation...", value=f"{search_message}\n{query_result_link}\n{result_description}")
+        # await ctx.send(embed=embed)
+
     # @commands.command()
     # async def rtfm(self, ctx, *, keywords: str):
     #     response = requests.get(f"https://www.google.com/search?q={keywords}")
@@ -189,8 +273,6 @@ async def on_message(self, ctx, message, bad_words):
                     embed.add_field(name="Uh oh!",
                                     value=f"{message.author.name, message.author.id} was muted for sending messages too quickly.")
                     spamming_user = message.author.name
-
-
 
 
     # @commands.command()
