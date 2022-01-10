@@ -4,7 +4,7 @@ import asyncio
 from discord import Forbidden
 from discord.ext.commands import has_permissions
 import textwrap
-from googlesearch import search
+# from googlesearch import search
 import datetime
 
 class Moderation(commands.Cog):
@@ -154,14 +154,14 @@ class Moderation(commands.Cog):
         embed.add_field(name=f"User information", value=f"User created on {created_on}\nUser joined on {joined_on}\nLink to user's profile picture {user_pfp}")
         await ctx.send(embed=embed)
 
-    @commands.command()
-    async def rtfm(self, ctx, *, keywords: str):
-        embed = discord.Embed()
-        for query in search(keywords, tld="co.in", num=5, start=0, stop=5, pause=3):
-            embed.add_field(name="Result found!", value=f"{query}")
-        await ctx.send(embed=embed)
-        await asyncio.sleep(20)
-        await ctx.delete_message()
+    # @commands.command()
+    # async def rtfm(self, ctx, *, keywords: str):
+    #     embed = discord.Embed()
+    #     for query in search(keywords, tld="co.in", num=5, start=0, stop=5, pause=3):
+    #         embed.add_field(name="Result found!", value=f"{query}")
+    #     await ctx.send(embed=embed)
+    #     await asyncio.sleep(20)
+    #     await ctx.delete_message()
 
     @commands.command()
     async def create_event_reminder(self, ctx, time, *, event: str, members: discord.Member):
