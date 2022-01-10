@@ -209,7 +209,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     async def mute(self, ctx, member: discord.Member, *, reason: str):
-
+        pass
 
 
     @commands.Cog.listener()
