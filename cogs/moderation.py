@@ -185,10 +185,10 @@ class Moderation(commands.Cog):
             reaction_x = await var.add_reaction("❌")
 
             
-    # commands.has_permissions(administrator=True)
+    # @commands.has_permissions(administrator=True)
     # @commands.command()
     # async def serverinfo(self, ctx):
-    #     request_time = datetime.datetime.now()
+    # request_time = datetime.datetime.now()
     #     embed = discord.Embed(title="Info for {}".format(ctx.message.server.name), description="Information about the server")
     #     await embed.add_field(name="Server name: ", value=ctx.message.server.name, inline=True)
     #     await embed.add_field(name="Server id: ", value=ctx.message.server.id, inline=True)
