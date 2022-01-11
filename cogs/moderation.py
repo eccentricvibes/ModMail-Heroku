@@ -159,8 +159,7 @@ class Moderation(commands.Cog):
     async def rename(self, ctx, member: discord.Member, new_name, *, reason: str):
         embed = discord.Embed()
         await member.edit(nick=new_name)
-        embed.add_field(name="Renaming user...",
-                        value=f"{member.name}'s nickname was successfully changed! Sending reason to user...")
+        embed.add_field(name="Renaming user...", value=f"{member.name}'s nickname was successfully changed! Sending reason to user...")
         await member.send(reason)
         await ctx.send(embed=embed)
 
@@ -312,7 +311,7 @@ class Moderation(commands.Cog):
                 pass
 
         elif isinstance(error, discord.ext.commands.CheckFailure):
-            error_message = self.bot.send_message("Sorry, but you don't have permission to run this command. Only staff members or people with moderator permissions can run this command."
+            error_message = self.bot.send_message("Sorry, but you don't have permission to run this command. Only staff members or people with moderator permissions can run this command.")
             await asyncio.sleep(10)
             try:
                 await self.bot.delete_message(error_message)
