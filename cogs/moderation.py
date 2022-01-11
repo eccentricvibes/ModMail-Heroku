@@ -6,6 +6,10 @@ from discord.ext.commands import has_permissions
 import textwrap
 # from googlesearch import search
 import datetime
+server_nickname = []
+server_activities = []
+server_description = []
+
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -114,19 +118,34 @@ class Moderation(commands.Cog):
         await ctx.send(embed=embed)
 
 
-    # @commands.command()
-    # async def commands_help(self, ctx):
-    #     for page in self.paginator.pages:
-    #         embed = discord.Embed(description=page)
-    #         await ctx.send(embed=embed)
-
-
-
-
-
     @commands.command()
-    async def mute(self, user: discord.Member, *, reason: str):
-        embed = discord.Embed()
+    @has_permissions(administrator=True)
+    async def poll(self, ctx, *, message: str):
+        upvote_emoji = discord.utils.get(self.bot.get_all_emojis(), name="upvote")
+        downvote_emoji = discord.utils.get(self.bot.get_all_emojis(), name="downvote")
+        embed = discord.Embed(title="Poll", description=f"{message}")
+        await embed.add_field(name="Please take your vote below.", value="Reply with <:upvote:452583845305384981> to vote **Yes**\n\nReact with <:downvote:452583859532333067> to vote **No**")
+        await ctx.send("@everyone", embed=embed)
+        await self.bot.add_reaction(upvote_emoji)
+        await self.bot.add_reaction(downvote_emoji)
+        await asyncio.sleep(60)
+        await ctx.delete_message()
+        await ctx.send("Poll is over!")
+        await asyncio.sleep(10)
+        await ctx.delete_message()
+
+    @poll.error
+    async def pollerror(self, error, ctx):
+        if isinstance(error, discord.ext.commands.CheckFailure):
+            userID = (ctx.message.author.id)
+            await self.bot.send_message(f"@{ctx.message.author}, you don't have the permission to run that command! User ID - {userID}")
+            await self.bot.delete_message(ctx.message)
+
+        elif isinstance(error, discord.ext.commands.MissingRequiredArgument):
+            userID = (ctx.message.author.id)
+            await self.bot.send_message(f"@{ctx.message.author}, please specify what the vote is for. User ID - {userID}")
+            await self.bot.delete_message(ctx.message)
+
 
     # @commands.command(aliases=["c_h"])
     # async def commands_help(self, ctx, bot):
@@ -185,30 +204,149 @@ class Moderation(commands.Cog):
             reaction_x = await var.add_reaction("❌")
 
             
-    # @commands.has_permissions(administrator=True)
-    # @commands.command()
-    # async def serverinfo(self, ctx):
-    # request_time = datetime.datetime.now()
-    #     embed = discord.Embed(title="Info for {}".format(ctx.message.server.name), description="Information about the server")
-    #     await embed.add_field(name="Server name: ", value=ctx.message.server.name, inline=True)
-    #     await embed.add_field(name="Server id: ", value=ctx.message.server.id, inline=True)
-    #     await embed.add_field(name="Server members: ", value=f"{len(ctx.message.server.members)}", inline=True)
-    #     await embed.add_field(name="Server owner: ", value=ctx.message.server.owner, inline=True)
-    #     await embed.add_field(name="Server roles: ", value=f"{len(ctx.message.server.roles)}", inline=True)
-    #
-    #     servermade = ctx.message.server.
-    #
-    #     await embed.set_footer(text=f"{ctx.message.author} requested server information at {request_time.strftime('%H:%M:%S')} on {request_time.strftime('%m/%d/%Y')}")
+    @commands.has_permissions(administrator=True)
+    @commands.command()
+    async def serverinfo(self, ctx):
+        servermade = ctx.message.server.created_at
+        servermade2 = servermade.strftime("%B %d, %Y %I: %M %p")
+        request_time = datetime.datetime.now()
+        embed = discord.Embed(title="Info for {}".format(ctx.message.server.name), description="Information about the server")
+        await embed.add_field(name="Server name: ", value=ctx.message.server.name, inline=True)
+        await embed.add_field(name="Server id: ", value=ctx.message.server.id, inline=True)
+        await embed.add_field(name="Server members: ", value=f"{len(ctx.message.server.members)}", inline=True)
+        await embed.add_field(name="Server owner: ", value=ctx.message.server.owner, inline=True)
+        await embed.add_field(name="Server roles: ", value=f"{len(ctx.message.server.roles)}", inline=True)
+        await embed.add_field(name="Server established: ", value=f"{servermade2}", inline=True)
+
+
+        await embed.set_footer(text=f"{ctx.message.author} requested server information at {request_time.strftime('%H:%M:%S')} on {request_time.strftime('%m/%d/%Y')}")
 
 
     @commands.command()
-    async def mute(self, ctx, member: discord.Member, *, reason: str):
-        pass
+    async def mute(self, ctx, member: discord.Member, duration, *, reason: str):
+        server = ctx.message.server
+        role = discord.utils.get(member.server.roles, name="Muted")
+        memberID = (member.id)
+        modID = (ctx.message.author.id)
+        embed = discord.Embed(title="Member muted.")
+        embed.add_field(name="Member muted", value=f"@{ctx.mention(member)}, member ID: {memberID}", inline=True)
+        embed.add_field(name="Mod", value=f"@{ctx.mention(ctx.message.author)}, member ID: {modID}", inline=True)
+        embed.add_field(name="Duration", value=f"{duration}", inline=True)
+        embed.add_field(name="Reason", value=f"{reason}", inline=True)
+
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.timestamp = datetime.datetime.now()
+
+        try:
+            log_channel = discord.utils.get(ctx.message.server.channels, name="public-logs")
+            await self.bot.send_message(log_channel, embed=embed)
+        except discord.ext.commands.ChannelNotFound:
+            await self.bot.send_message("There was no public log channel for me to record my activities in, so I went ahead and created one!")
+            guild = ctx.guild
+            await guild.create_text_channel("public-logs")
+
+        await self.bot.add_roles(member, role)
+        await self.bot.send_message("User successfully muted!")
+        await self.bot.delete_message(ctx.message)
+
+        time_duration = duration * 60
+        await asyncio.sleep(time_duration)
+        try:
+            await self.bot.remove_roles(member, role)
+            await self.bot.send_message("User successfully unmuted!")
+        except:
+            pass
+
+    @mute.error()
+    async def mute_error(self, error, ctx):
+        if isinstance(error, discord.ext.commands.BadArgument):
+            botMessage = self.bot.send_message(ctx.message.channel, f"@{ctx.message.author}, sorry I couldn't find this user.")
+            await self.bot.delete_message(ctx.message)
+            await asyncio.sleep(5)
+            try:
+                await self.bot.delete_message(botMessage)
+            except:
+                pass
+
+        elif isinstance(error, discord.ext.commands.MissingRequiredArgument):
+            await self.bot.send_message(f"@{ctx.message.author} - You are missing a required argument! Ex: !mute @user 2 for spamming")
+
+        elif isinstance(error, discord.ext.commands.CheckFailure):
+            await self.bot.send_message(f"@{ctx.message.author} - Sorry, but you don't have permission to run this command.")
+
+    @has_permissions(ban_members=True)
+    @commands.command()
+    async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason specified"):
+        kicked_id = member.id
+        kick_time = datetime.datetime.now()
+        embed = discord.Embed(title="User kicked", description="A server member was kicked for a violation of the server's rules.")
+        embed.add_field(name="Member kicked", value=f"{member.name}, ID - {kicked_id}", inline=True)
+        embed.add_field(name="Reason", value=f"{reason}")
+        await ctx.send(embed=embed)
+        await member.send("Please review your actions, and feel free to message a staff member to appeal your kick.")
+        try:
+            log_channel = discord.utils.get(ctx.message.server.channels, name="public-logs")
+            await self.bot.send_message(log_channel, embed=embed)
+        except discord.ext.commands.ChannelNotFound:
+            await self.bot.send_message("There was no p ublic log channel for me to record my activities in, so SI went ahead and created one!")
+            guild = ctx.guild
+            await guild.create_text_channel("public-logs")
+
+
+    @kick.error
+    async def kick_error(self, ctx, error):
+        if isinstance(error, discord.ext.commands.BadArgument):
+            error_message = self.bot.send_message("Sorry, but I couldn't find this user. Please double check for any spelling errors or a misreference.")
+            await asyncio.sleep(10)
+            try:
+                await self.bot.delete_message(error_message)
+            except:
+                pass
+
+        elif isinstance(error, discord.ext.commands.MissingRequiredArgument):
+            error_message = self.bot.send_message("I believe you may have missed a required argument. Ex: !kick @user for nothing in particular")
+            await asyncio.sleep(10)
+            try:
+                await self.bot.delete_message(error_message)
+            except:
+                pass
+
+        elif isinstance(error, discord.ext.commands.CheckFailure):
+            error_message = self.bot.send_message("Sorry, but you don't have permission to run this command. Only staff members or people with moderator permissions can run this command."
+            await asyncio.sleep(10)
+            try:
+                await self.bot.delete_message(error_message)
+            except:
+                pass
+
+
+    @has_permissions(administrator=True)
+    @commands.command()
+    async def set_serverprofile(self, nickname: str, activities: str, description: str):
+        server_nickname.append(nickname)
+        server_activities.append(activities)
+        server_description.append(description)
+
+    @has_permissions(administrator=True)
+    @commands.command()
+    async def change_serverprofile(self, new_nickname: str, new_activities: str, new_description: str):
+        server_nickname.clear()
+        server_activities.clear()
+        server_description.clear()
+        server_nickname.append(new_nickname)
+        server_activities.append(new_activities)
+        server_description.append(new_description)
 
 
     @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member):
-        embed = discord.Embed()
+    async def on_member_join(self, ctx, member: discord.Member):
+        server = ctx.message.server
+        embed = discord.Embed(title=f"@{member}, welcome to {server}!", description=f"{server_description[0]}")
+        try:
+            welcome_channel = discord.utils.get(server.channel, name="welcome")
+            await self.bot.send_message(welcome_channel, embed=embed)
+        except discord.ext.commands.ChannelNotFound:
+            await member.send(embed=embed)
 
     # @commands.command()
     # async def store(self, ctx):
