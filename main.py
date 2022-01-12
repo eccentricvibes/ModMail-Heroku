@@ -3,9 +3,11 @@ from discord.ext import commands
 import os
 import asyncio
 
+
 def bot_task_callback(future: asyncio.Future):
     if future.exception():
         raise future.exception()
+
 
 async def run_bot():
     try:

@@ -9,6 +9,7 @@ import datetime
 server_nickname = []
 server_activities = []
 server_description = []
+user_warns = dict()
 
 
 class Moderation(commands.Cog):
@@ -204,7 +205,7 @@ class Moderation(commands.Cog):
 
             
     @commands.has_permissions(administrator=True)
-    @commands.command()
+    @commands.command(help="Gets information about the server")
     async def serverinfo(self, ctx):
         servermade = ctx.message.server.created_at
         servermade2 = servermade.strftime("%B %d, %Y %I: %M %p")
@@ -221,7 +222,7 @@ class Moderation(commands.Cog):
         await embed.set_footer(text=f"{ctx.message.author} requested server information at {request_time.strftime('%H:%M:%S')} on {request_time.strftime('%m/%d/%Y')}")
 
 
-    @commands.command()
+    @commands.command(help="Mutes people who are violating rules of the server")
     async def mute(self, ctx, member: discord.Member, duration, *, reason: str):
         server = ctx.message.server
         role = discord.utils.get(member.server.roles, name="Muted")
@@ -256,7 +257,7 @@ class Moderation(commands.Cog):
         except:
             pass
 
-    @mute.error()
+    @mute.error
     async def mute_error(self, error, ctx):
         if isinstance(error, discord.ext.commands.BadArgument):
             botMessage = self.bot.send_message(ctx.message.channel, f"@{ctx.message.author}, sorry I couldn't find this user.")
@@ -274,7 +275,7 @@ class Moderation(commands.Cog):
             await self.bot.send_message(f"@{ctx.message.author} - Sorry, but you don't have permission to run this command.")
 
     @has_permissions(ban_members=True)
-    @commands.command()
+    @commands.command(help="Kicks a member that was violating the server's rules")
     async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason specified"):
         kicked_id = member.id
         kick_time = datetime.datetime.now()
@@ -287,7 +288,7 @@ class Moderation(commands.Cog):
             log_channel = discord.utils.get(ctx.message.server.channels, name="public-logs")
             await self.bot.send_message(log_channel, embed=embed)
         except discord.ext.commands.ChannelNotFound:
-            await self.bot.send_message("There was no p ublic log channel for me to record my activities in, so SI went ahead and created one!")
+            await self.bot.send_message("There was no public log channel for me to record my activities in, so SI went ahead and created one!")
             guild = ctx.guild
             await guild.create_text_channel("public-logs")
 
@@ -318,16 +319,47 @@ class Moderation(commands.Cog):
             except:
                 pass
 
+    @has_permissions(ban_members=True, administrator=True)
+    @commands.command(help="Optimizes the server for bot usage, can only be run by administrators")
+    async def optimize(self, ctx):
+        server = ctx.message.server
+        try:
+            public_logs = discord.utils.get(ctx.message.server.channels, name="public-logs")
+        except discord.ext.commands.ChannelNotFound:
+            guild = ctx.guild
+            await guild.create_text_channel(name="public-logs")
+        for member in server:
+            user_warns[member] = 0
+
+
+    @has_permissions(ban_members=True, administrator=True)
+    async def warn(self, ctx, member: discord.Member, *, reason: str):
+        server = ctx.server
+        embed = discord.Embed(title="User warned")
+        await embed.add_field(name="User", value=f"{member.name}", inline=True)
+        await embed.add_field(name="Mod", value=f"{ctx.message.author.name}, ID - {ctx.message.author.id}", inline=True)
+        await embed.add_field(name="Reason", value=f"{reason}", inline=True)
+
+        user_warns[member] += 1
+        user_total_warns = user_warns.get(member, "No user found")
+        await embed.add_field(name="User total warns", value=f"{user_total_warns}")
+        try:
+            public_logs = discord.utils.get(ctx.message.server.channels, name="public-logs")
+            await self.bot.send_message(public_logs, embed=embed)
+        except discord.ext.commands.ChannelNotFound:
+            await self.bot.send_message()
+
+
 
     @has_permissions(administrator=True)
-    @commands.command()
+    @commands.command(help="Allows you to set the server profile")
     async def set_serverprofile(self, nickname: str, activities: str, description: str):
         server_nickname.append(nickname)
         server_activities.append(activities)
         server_description.append(description)
 
     @has_permissions(administrator=True)
-    @commands.command()
+    @commands.command(help="Allows you to change the previously set server profile")
     async def change_serverprofile(self, new_nickname: str, new_activities: str, new_description: str):
         server_nickname.clear()
         server_activities.clear()
