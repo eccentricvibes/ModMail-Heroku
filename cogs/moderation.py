@@ -221,7 +221,7 @@ class Moderation(commands.Cog):
 
         await embed.set_footer(text=f"{ctx.message.author} requested server information at {request_time.strftime('%H:%M:%S')} on {request_time.strftime('%m/%d/%Y')}")
 
-
+    @has_permissions(ban_members=True, administrator=True)
     @commands.command(help="Mutes people who are violating rules of the server")
     async def mute(self, ctx, member: discord.Member, duration, *, reason: str):
         server = ctx.message.server
@@ -257,41 +257,43 @@ class Moderation(commands.Cog):
         except:
             pass
 
-                                                                                                                                                         
-    # @mute.error
-    # async def mute_error(self, error, ctx):
-    #     if isinstance(error, discord.ext.commands.BadArgument):
-    #         botMessage = self.bot.send_message(ctx.message.channel, f"@{ctx.message.author}, sorry I couldn't find this user.")
-    #         await self.bot.delete_message(ctx.message)
-    #         await asyncio.sleep(5)
-    #         try:
-    #             await self.bot.delete_message(botMessage)
-    #         except:
-    #             pass
-    #
-    #     elif isinstance(error, discord.ext.commands.MissingRequiredArgument):
-    #         await self.bot.send_message(f"@{ctx.message.author} - You are missing a required argument! Ex: !mute @user 2 for spamming")
-    #
-    #     elif isinstance(error, discord.ext.commands.CheckFailure):
-    #         await self.bot.send_message(f"@{ctx.message.author} - Sorry, but you don't have permission to run this command.")
-    #
-    # @has_permissions(ban_members=True)
-    # @commands.command(help="Kicks a member that was violating the server's rules")
-    # async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason specified"):
-    #     kicked_id = member.id
-    #     kick_time = datetime.datetime.now()
-    #     embed = discord.Embed(title="User kicked", description="A server member was kicked for a violation of the server's rules.")
-    #     embed.add_field(name="Member kicked", value=f"{member.name}, ID - {kicked_id}", inline=True)
-    #     embed.add_field(name="Reason", value=f"{reason}")
-    #     await ctx.send(embed=embed)
-    #     await member.send("Please review your actions, and feel free to message a staff member to appeal your kick.")
-    #     try:
-    #         log_channel = discord.utils.get(ctx.message.server.channels, name="public-logs")
-    #         await self.bot.send_message(log_channel, embed=embed)
-    #     except discord.ext.commands.ChannelNotFound:
-    #         await self.bot.send_message("There was no public log channel for me to record my activities in, so SI went ahead and created one!")
-    #         guild = ctx.guild
-    #         await guild.create_text_channel("public-logs")
+
+    @mute.error
+    async def mute_error(self, error, ctx):
+        if isinstance(error, discord.ext.commands.BadArgument):
+            botMessage = self.bot.send_message(ctx.message.channel, f"@{ctx.message.author}, sorry I couldn't find this user.")
+            await self.bot.delete_message(ctx.message)
+            await asyncio.sleep(5)
+            try:
+                await self.bot.delete_message(botMessage)
+            except:
+                pass
+
+        elif isinstance(error, discord.ext.commands.MissingRequiredArgument):
+            await self.bot.send_message(f"@{ctx.message.author} - You are missing a required argument! Ex: !mute @user 2 for spamming")
+
+        elif isinstance(error, discord.ext.commands.CheckFailure):
+            await self.bot.send_message(f"@{ctx.message.author} - Sorry, but you don't have permission to run this command.")
+
+
+
+    @has_permissions(ban_members=True)
+    @commands.command(help="Kicks a member that was violating the server's rules")
+    async def kick(self, ctx, member: discord.Member, *, reason: str = "No reason specified"):
+        kicked_id = member.id
+        kick_time = datetime.datetime.now()
+        embed = discord.Embed(title="User kicked", description="A server member was kicked for a violation of the server's rules.")
+        embed.add_field(name="Member kicked", value=f"{member.name}, ID - {kicked_id}", inline=True)
+        embed.add_field(name="Reason", value=f"{reason}")
+        await ctx.send(embed=embed)
+        await member.send("Please review your actions, and feel free to message a staff member to appeal your kick.")
+        try:
+            log_channel = discord.utils.get(ctx.message.server.channels, name="public-logs")
+            await self.bot.send_message(log_channel, embed=embed)
+        except discord.ext.commands.ChannelNotFound:
+            await self.bot.send_message("There was no public log channel for me to record my activities in, so SI went ahead and created one!")
+            guild = ctx.guild
+            await guild.create_text_channel("public-logs")
 
 
     @kick.error
