@@ -34,7 +34,7 @@ async def run_bot():
 
         # Start bot with token from environment variable
         TOKEN = os.environ.get('token')
-        await bot.run(TOKEN)
+        await bot.start(TOKEN)
 
     finally:
         # Cleanup session and bot on shutdown
