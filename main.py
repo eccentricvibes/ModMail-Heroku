@@ -33,6 +33,7 @@ async def run_bot():
                 await bot.load_extension(f"cogs.{file[:-3]}")
 
         # Start bot with token from environment variable
+        TOKEN = os.environ.get('token')
         await bot.start(token)
 
     finally:
