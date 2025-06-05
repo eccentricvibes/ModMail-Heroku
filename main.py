@@ -16,7 +16,7 @@ async def run_bot():
         for file in os.listdir('cogs'):
             if file.endswith('py'):
                 bot.load_extension(f"cogs.{file[:-3]}")
-        await bot.start("token")
+        await bot.start("OTAxNTU1NDkzNzkxNzQ0MDAx.GXAj35.K-41-kyfAi3S6HRSZmu90jLmDpAMhLjS49U4TI")
     finally:
         if isinstance(bot.session, aiohttp.ClientSession):
             await bot.session.close()
