@@ -33,7 +33,7 @@ async def run_bot():
                 await bot.load_extension(f"cogs.{file[:-3]}")
 
         # Start bot with token from environment variable
-        await bot.start("OTAxNTU1NDkzNzkxNzQ0MDAx.GmBHJf.rv2dA4znzdCYGqrZeqjA5F0X88id1Xx7bN1Jms")
+        await bot.start(token)
 
     finally:
         # Cleanup session and bot on shutdown
